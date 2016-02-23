@@ -1,16 +1,22 @@
 #!/bin/bash
 
 
+#####################
+#install all packages
+sudo apt-get update
+sudo apt-get install g++ make gawk -y
+sudo apt-get install vim wget xz-utils -y
+
 ##############
 #create folder
 mkdir pi_cross
-
 
 #############
 #remove only directories
 
 cd pi_cross
 rm -R `ls -1 -d */`
+rm -rf /opt/cross
 cd ..
 
 ################################
@@ -58,7 +64,7 @@ for f in *.tar*; do tar xf $f; done
 #################
 #check file exist
 error_unm=0
-pwd
+
 if [ ! -d "$BINUTILS_PATH" ];then
 	echo "folder not found! $BINUTILS_PATH"; exit 1
 elif [ !  -d "$GCC_PATH" ];then
@@ -95,15 +101,15 @@ cd ..
 
 #####################
 #create corss compiler path
-sudo mkdir -p /opt/cross
+mkdir -p /opt/cross
 export PATH=/opt/cross/bin:$PATH
 
 #####################
 #1. build Binutils
 mkdir build-binutils
 cd build-binutils
-../$GCC_PATH/configure --prefix=/opt/cross --target=$TARGET || { echo 'step 1 -1  failed' ; exit 1; }
-make -j32 || { echo 'step 1 -2  failed' ; exit 1; }
+../$BINUTILS_PATH/configure --prefix=/opt/cross --target=$TARGET  || { echo 'step 1 -1  failed' ; exit 1; }
+make -j32  || { echo 'step 1 -2  failed' ; exit 1; }
 make install || { echo 'step 1 -3  failed' ; exit 1; }
 cd ..
 
@@ -161,12 +167,12 @@ cd ..
 
 $TARGET-gcc -v
 
-echo "void main(0){printf(\"hello world\");}" > hello_world.c
+echo "#include <stdio.h>" > hello_world.c
+echo "void main(void){printf(\"hello world\");}">> hello_world.c
 
 
 $TARGET-gcc -v hello_world.c -o hello_world
 
-
-
+readelf -e hello_world | less
 
 
