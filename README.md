@@ -4,11 +4,11 @@ This project is aobut how to build a GCC Cross-Compiler,
 in my blog 
 http://fichugh.blogspot.tw/2016/02/how-to-build-gcc-cross-compiler.html
 
-I write a script to test (download and build) automatically,
+I writed a script to test (download and build) automatically,
 the thing you have to do is modified the wget-list file for the newest version of packages,
 and run run_it.sh
 
-the time of my build is around 10 m
+my build time is around 10 m
 
 just try :
 
