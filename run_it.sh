@@ -34,7 +34,7 @@ GLIBC_PATH=$(ls pi_cross | grep glibc.* | sed 's/.tar.*//I')
 MPFR_PATH=$(ls pi_cross | grep mpfr.* | sed 's/.tar.*//I')
 
 #be careful of  GMP package, there is an 'a' after the package name
-GMP_PATH=$(ls pi_cross | grep gmp.* | sed 's/[a-z].tar.*//I')
+GMP_PATH=$(ls pi_cross | grep gmp.* | sed 's/.tar.*//I')
 MPC_PATH=$(ls pi_cross | grep mpc.* | sed 's/.tar.*//I')
 ISL_PATH=$(ls pi_cross | grep isl.* | sed 's/.tar.*//I')
 CLOOG_PATH=$(ls pi_cross | grep cloog.* | sed 's/.tar.*//I')
