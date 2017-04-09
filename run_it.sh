@@ -1,5 +1,15 @@
 #!/bin/bash
 
+read -p "step by step?(yes/no)" STEP
+
+function showstep
+{
+	if [ $STEP == "yes" ]; then
+		echo ""; echo "";
+		echo $1
+		read -p "Press any key for next step"
+	fi
+}
 
 #####################
 #install all packages
@@ -9,11 +19,13 @@ sudo apt-get install vim wget xz-utils -y
 
 ##############
 #create folder
+showstep "create pi_cross"
 mkdir pi_cross
 
 #############
 #remove only directories
 
+showstep "remove pi_cross and /opt/cross"
 cd pi_cross
 rm -R `ls -1 -d */`
 rm -rf /opt/cross
@@ -21,12 +33,14 @@ cd ..
 
 ################################
 #download packages via wget-list
+showstep "download packages"
 wget --input-file=wget-list --continue --directory-prefix=./pi_cross
 
 
 
 ##################
 #get package names
+showstep "get package names"
 BINUTILS_PATH=$(ls pi_cross | grep binutils.* | sed 's/.tar.*//I')
 GCC_PATH=$(ls pi_cross | grep gcc.* | sed 's/.tar.*//I')
 K_HEADER_PATH=$(ls pi_cross | grep linux.* | sed 's/.tar.*//I')
@@ -55,6 +69,7 @@ echo $CLOOG_PATH
 
 #########
 #unpacked
+showstep "unpacking packages.."
 cd pi_cross
 echo "packages untar..."
 for f in *.tar*; do tar xf $f; done
@@ -63,6 +78,7 @@ for f in *.tar*; do tar xf $f; done
 
 #################
 #check file exist
+showstep "check file exist.."
 error_unm=0
 
 if [ ! -d "$BINUTILS_PATH" ];then
@@ -91,6 +107,7 @@ export TARGET=arm-linux-gnueabihf
 
 #####################
 #build symbolic link
+showstep "build symbolic link"
 cd $GCC_PATH
 ln -s ../$MPFR_PATH mpfr
 ln -s ../$GMP_PATH gmp
@@ -101,11 +118,13 @@ cd ..
 
 #####################
 #create corss compiler path
+showstep "create cross compiler path"
 mkdir -p /opt/cross
 export PATH=/opt/cross/bin:$PATH
 
 #####################
 #1. build Binutils
+showstep "build Binutils"
 mkdir build-binutils
 cd build-binutils
 ../$BINUTILS_PATH/configure --prefix=/opt/cross --target=$TARGET  || { echo 'step 1 -1  failed' ; exit 1; }
@@ -115,12 +134,14 @@ cd ..
 
 ##########################
 #2. install Kernel Header
+showstep "install Kernel Header"
 cd $K_HEADER_PATH
 make ARCH=arm INSTALL_HDR_PATH=/opt/cross/$TARGET headers_install || { echo 'step 2 -1  failed' ; exit 1; }
 cd ..
 
 ############################
 #3. C/C++ Compilers
+showstep "C/C++ Compilers"
 mkdir -p build-gcc
 cd build-gcc
 ../$GCC_PATH/configure --prefix=/opt/cross --target=$TARGET --enable-languages=c,c++ || { echo 'step 3 -1  failed' ; exit 1; }
@@ -131,6 +152,7 @@ cd ..
 
 #############################
 #4. Standard C Library Headers and Startup Files
+showstep "Standard C Library Headers and Startup Files"
 mkdir -p build-glibc
 cd build-glibc
 ../$GLIBC_PATH/configure --prefix=/opt/cross/$TARGET --build=$MACHTYPE --host=$TARGET --target=$TARGET --with-headers=/opt/cross/$TARGET/include libc_cv_forced_unwind=yes
@@ -144,6 +166,7 @@ cd ..
 
 ###########################
 #5. Compiler Support Library
+showstep "Compiler Support Library"
 cd build-gcc
 make -j32 all-target-libgcc || { echo 'step 5 -1  failed' ; exit 1; }
 make install-target-libgcc || { echo 'step 5 -2  failed' ; exit 1; }
@@ -151,6 +174,7 @@ cd ..
 
 ###########################
 #6. Standard C Library
+showstep "Standard C Library"
 cd build-glibc
 make -j32 || { echo 'step 6 -1  failed' ; exit 1; }
 make install || { echo 'step 6 -2  failed' ; exit 1; }
@@ -158,12 +182,14 @@ cd ..
 
 #############################
 #7. Standard C++ Library
+showstep "Standard C++ Library"
 cd build-gcc
 make -j32 || { echo 'step 7 -1  failed' ; exit 1; }
 make install || { echo 'step 7 -2  failed' ; exit 1; }
 
 cd ..
 
+showstep "build finished show result"
 
 $TARGET-gcc -v
 
